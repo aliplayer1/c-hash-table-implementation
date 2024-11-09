@@ -42,3 +42,53 @@ void insert(HashTable *table, const char *key, int value) {
     new_entry->next = table->buckets[index];
     table->buckets[index] = new_entry;
 }
+
+int search(HashTable *table, const char *key) {
+    unsigned int index = hash(key);
+    Entry *entry = table->buckets[index];
+    while (entry != NULL) {
+        if (strcmp(entry->key, key) == 0) {
+            return entry->value;
+        }
+        entry = entry->next;
+    }
+    return -1; // Return -1 if key is not found
+}
+
+void delete(HashTable *table, const char *key) {
+    unsigned int index = hash(key);
+    Entry *entry = table->buckets[index];
+    Entry *prev = NULL;
+
+    while (entry != NULL && strcmp(entry->key, key) != 0) {
+        prev = entry;
+        entry = entry->next;
+    }
+
+    if (entry == NULL) {
+        return; // Key not found
+    }
+
+    if (prev == NULL) {
+        table->buckets[index] = entry->next;
+    } else {
+        prev->next = entry->next;
+    }
+
+    free(entry->key);
+    free(entry);
+}
+
+void free_table(HashTable *table) {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        Entry *entry = table->buckets[i];
+        while (entry != NULL) {
+            Entry *temp = entry;
+            entry = entry->next;
+            free(temp->key);
+            free(temp);
+        }
+    }
+    free(table->buckets);
+    free(table);
+}
